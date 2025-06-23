@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 
+// =========================================================================
+// Halaman Detail Cuaca (Slide 3)
+// =========================================================================
 class WeatherDetailPage extends StatelessWidget {
   const WeatherDetailPage({super.key});
 
@@ -16,48 +19,52 @@ class WeatherDetailPage extends StatelessWidget {
             Navigator.pop(context); // Kembali ke halaman sebelumnya
           },
         ),
-        actions: [
-          // Search Bar di dalam AppBar
-          Expanded(
-            child: Container(
-              margin: const EdgeInsets.only(left: 10, right: 10),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.15), // Latar belakang transparan gelap
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Row(
-                children: const [
-                  Padding(
-                    padding: EdgeInsets.only(right: 8.0),
-                    child: Text(
-                      'The\nWeather\nChannel', // Placeholder untuk logo "The Weather Channel"
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+        // Kode title yang digabungkan dari AppBar lama dan search bar
+        title: SizedBox(
+          height: kToolbarHeight, // Tinggi AppBar standar
+          child: Row(
+            children: [
+              const Padding(
+                padding: EdgeInsets.only(right: 8.0),
+                child: Text(
+                  'The\nWeather\nChannel', // Placeholder untuk logo "The Weather Channel"
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
                   ),
-                  Expanded(
-                    child: TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Cari Kode Pos',
-                        hintStyle: TextStyle(color: Colors.white54),
-                        border: InputBorder.none,
-                        isDense: true, // Mengurangi padding internal
-                      ),
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                  Icon(Icons.search, color: Colors.white54, size: 20), // Ikon pencarian
-                  SizedBox(width: 8),
-                  Icon(Icons.person_outline, color: Colors.white54, size: 20), // Ikon profil
-                  SizedBox(width: 8),
-                  Icon(Icons.menu, color: Colors.white, size: 20), // Ikon menu
-                ],
+                ),
               ),
-            ),
+              Expanded(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15), // Latar belakang transparan gelap
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Cari Kode Pos',
+                      hintStyle: TextStyle(color: Colors.white54),
+                      border: InputBorder.none,
+                      prefixIcon: Icon(Icons.search, color: Colors.white54, size: 20),
+                      isDense: true, // Mengurangi padding internal
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                    ),
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: const [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
+            child: Icon(Icons.person_outline, color: Colors.white54, size: 24), // Ikon profil
+          ),
+          Padding(
+            padding: EdgeInsets.only(right: 16.0),
+            child: Icon(Icons.menu, color: Colors.white, size: 24), // Ikon menu
           ),
         ],
       ),
@@ -67,7 +74,7 @@ class WeatherDetailPage extends StatelessWidget {
             // Bagian Header Utama Cuaca
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(20.0).copyWith(top: MediaQuery.of(context).padding.top + kToolbarHeight), // Sesuaikan padding atas dengan status bar dan appbar
+              padding: EdgeInsets.all(20.0).copyWith(top: MediaQuery.of(context).padding.top + kToolbarHeight + 20), // Sesuaikan padding atas
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -82,7 +89,6 @@ class WeatherDetailPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 20), // Memberi sedikit ruang dari appbar
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -96,12 +102,12 @@ class WeatherDetailPage extends StatelessWidget {
                         ),
                       ),
                       // Gambar ikon cuaca
-                      // Menggunakan placeholder image, ganti dengan ikon dari API nanti
                       Image.network(
-                        'https://placehold.co/100x100/000000/FFFFFF?text=%E2%98%81', // Placeholder icon (cloud with sun emoji)
-                        // 'https://openweathermap.org/img/wn/04d@2x.png', // Contoh ikon OpenWeatherMap
-                        color: Colors.white, // Agar ikon jadi putih jika placeholder adalah SVG atau bisa diwarnai
-                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.cloud, size: 100, color: Colors.white), // Fallback icon
+                        'https://placehold.co/100x100/000000/FFFFFF?text=%E2%98%81', // Placeholder ikon (emoji awan dengan matahari)
+                        color: Colors.white,
+                        errorBuilder: (context, error, stackTrace) => const Icon(Icons.cloud, size: 100, color: Colors.white),
+                        width: 100,
+                        height: 100,
                       ),
                     ],
                   ),
@@ -211,19 +217,19 @@ class WeatherDetailPage extends StatelessWidget {
                   children: [
                     _buildDetailRow(Icons.thermostat_outlined, 'Maks/Min', '31°/25 °'),
                     _buildDivider(),
-                    _buildDetailRow(Icons.water_drop_outlined, 'Angin', '< 11 km/j', icon2: Icons.arrow_back), // Ikon panah kiri
+                    _buildDetailRow(Icons.air, 'Angin', '< 11 km/j', icon2: Icons.arrow_back), // Menggunakan Icons.air untuk angin
                     _buildDivider(),
                     _buildDetailRow(Icons.opacity_outlined, 'Kelembapan', '84 %'),
                     _buildDivider(),
-                    _buildDetailRow(Icons.bubble_chart, 'Titik Embun', '25 °'), // Icon placeholder, ganti jika ada
+                    _buildDetailRow(Icons.thermostat, 'Titik Embun', '25 °'), // Menggunakan Icons.thermostat
                     _buildDivider(),
-                    _buildDetailRow(Icons.bar_chart, 'Tekanan', '↑1012.2 mb'), // Icon placeholder, ganti jika ada
+                    _buildDetailRow(Icons.speed, 'Tekanan', '↑1012.2 mb'), // Icons.speed
                     _buildDivider(),
                     _buildDetailRow(Icons.wb_sunny_outlined, 'Indeks UV', '1 dari 11'),
                     _buildDivider(),
                     _buildDetailRow(Icons.remove_red_eye_outlined, 'Jarak Pandang', 'Tak Terbatas'),
                     _buildDivider(),
-                    _buildDetailRow(Icons.nightlight_round, 'Fase Bulan', 'Benjol Akhir'), // Icon placeholder, ganti jika ada
+                    _buildDetailRow(Icons.nightlight_round, 'Fase Bulan', 'Benjol Akhir'), // Icon nightlight_round
                   ],
                 ),
               ),

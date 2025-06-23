@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:weather_app/weather_service.dart'; // Pastikan path ini benar
-import 'package:weather_app/weather_model.dart'; // Pastikan path ini benar
+import 'package:weather_app/weather_service.dart';
+import 'package:weather_app/weather_model.dart';
+import 'package:weather_app/manage_cities_page.dart'; // Import halaman Manage Cities
+import 'package:weather_app/weather_detail_page.dart'; // Import halaman Weather Detail
 
 void main() {
   runApp(const MyApp());
@@ -49,7 +51,7 @@ class MyApp extends StatelessWidget {
 }
 
 // =========================================================================
-// Halaman Dashboard Cuaca (Slide 1) - DINAMIS
+// Halaman Dashboard Cuaca (Slide 1) - DINAMIS & Desain Baru
 // =========================================================================
 class WeatherDashboardPage extends StatefulWidget {
   const WeatherDashboardPage({super.key});
@@ -59,26 +61,20 @@ class WeatherDashboardPage extends StatefulWidget {
 }
 
 class _WeatherDashboardPageState extends State<WeatherDashboardPage> {
-  // --- KOREKSI ADA DI SINI ---
-  // Deklarasi WeatherService yang benar
   final WeatherService _weatherService = WeatherService();
-  // Deklarasi TextEditingController yang benar
   final TextEditingController _citySearchController = TextEditingController();
-  // --- END KOREKSI ---
-
+  
   Weather? _currentWeather; // Untuk menyimpan data cuaca saat ini
   bool _isLoading = false; // Status loading
   String? _error; // Pesan error jika ada
 
-
-  // Inisialisasi state, ambil cuaca default saat aplikasi dimulai
   @override
   void initState() {
     super.initState();
-    _fetchWeather('Jakarta'); // Ambil cuaca untuk kota default (misal Jakarta) saat aplikasi pertama kali dimuat
+    // Memuat cuaca untuk kota default saat aplikasi pertama kali dimulai
+    _fetchWeather('Jakarta');
   }
 
-  // Fungsi untuk mengambil data cuaca dari API
   Future<void> _fetchWeather(String cityName) async {
     if (cityName.isEmpty) {
       setState(() {
@@ -88,23 +84,23 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage> {
     }
 
     setState(() {
-      _isLoading = true; // Set loading true saat memulai fetch
-      _error = null; // Hapus error sebelumnya
-      _currentWeather = null; // Hapus data cuaca sebelumnya
+      _isLoading = true;
+      _error = null;
+      _currentWeather = null;
     });
 
     try {
       final weather = await _weatherService.fetchWeather(cityName);
       setState(() {
-        _currentWeather = weather; // Simpan data cuaca yang berhasil
+        _currentWeather = weather;
       });
     } catch (e) {
       setState(() {
-        _error = 'Gagal memuat cuaca untuk $cityName. Coba lagi. (${e.toString()})'; // Simpan pesan error
+        _error = 'Gagal memuat cuaca untuk $cityName. Coba lagi. (${e.toString()})';
       });
     } finally {
       setState(() {
-        _isLoading = false; // Set loading false setelah fetch selesai
+        _isLoading = false;
       });
     }
   }
@@ -112,43 +108,90 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          _buildCustomAppBar(context),
-          SliverPadding(
-            padding: const EdgeInsets.all(16.0),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate(
-                [
-                  // TextField pencarian kota
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 20.0),
-                    child: TextField(
-                      controller: _citySearchController,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        hintText: 'Cari kota...',
-                        hintStyle: const TextStyle(color: Colors.white54),
-                        prefixIcon: const Icon(Icons.search, color: Colors.white70),
-                        suffixIcon: _isLoading
-                            ? const Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                              )
-                            : null,
-                        filled: true,
-                        fillColor: Colors.white.withOpacity(0.1),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15.0),
-                          borderSide: BorderSide.none,
-                        ),
-                      ),
-                      onSubmitted: (value) {
-                        _fetchWeather(value); // Panggil fetchWeather saat tombol enter ditekan
-                      },
-                    ),
+      extendBodyBehindAppBar: true, // Memungkinkan body di belakang appbar untuk latar belakang gambar
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Padding(
+          padding: EdgeInsets.only(left: 0.0, top: 20.0), // Sesuaikan padding agar rata kiri
+          child: Row(
+            children: [
+              Text(
+                'Trasak',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(width: 5),
+              // Indikator lokasi (titik-titik)
+              Icon(Icons.circle, size: 8, color: Colors.white70),
+              SizedBox(width: 4),
+              Icon(Icons.circle, size: 8, color: Colors.white70),
+              SizedBox(width: 4),
+              Icon(Icons.circle, size: 8, color: Colors.white70),
+            ],
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 8.0, top: 20.0),
+            child: Row(
+              children: [
+                // Tombol menu
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
                   ),
-
+                  child: IconButton(
+                    icon: const Icon(Icons.menu, color: Colors.white),
+                    onPressed: () {
+                      // Aksi untuk ikon menu
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Tombol pengaturan
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(Icons.settings, color: Colors.white),
+                    onPressed: () {
+                      // Aksi untuk ikon pengaturan
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          // Latar belakang gambar - KOREKSI DI SINI: URL placeholder tanpa teks
+          Positioned.fill(
+            child: Image.network(
+              'https://placehold.co/1000x1500/1E88E5/FFFFFF/png', // URL gambar placeholder tanpa teks
+              fit: BoxFit.cover,
+              colorBlendMode: BlendMode.darken, // Memberi efek gelap pada gambar
+              color: Colors.black.withOpacity(0.4), // Menyesuaikan opasitas gelap
+              errorBuilder: (context, error, stackTrace) => Container(
+                color: Colors.blueGrey.shade900, // Warna solid jika gambar gagal dimuat
+              ),
+            ),
+          ),
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: MediaQuery.of(context).padding.top + kToolbarHeight), // Spacer untuk AppBar
                   if (_isLoading)
                     const Center(child: CircularProgressIndicator(color: Colors.blueAccent))
                   else if (_error != null)
@@ -166,41 +209,45 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          _currentWeather!.cityName,
-                          style: const TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                        const SizedBox(height: 50), // Jarak dari atas
+                        // Suhu utama
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${_currentWeather!.temperature.toStringAsFixed(0)}°',
+                            style: const TextStyle(fontSize: 100, fontWeight: FontWeight.bold, color: Colors.white),
+                          ),
                         ),
                         const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${_currentWeather!.temperature.toStringAsFixed(0)}°C', // Tampilkan suhu tanpa desimal
-                              style: const TextStyle(fontSize: 64, fontWeight: FontWeight.bold, color: Colors.white),
-                            ),
-                            Image.network(
-                              _weatherService.getWeatherIconUrl(_currentWeather!.iconCode),
-                              width: 100,
-                              height: 100,
-                              errorBuilder: (context, error, stackTrace) => const Icon(Icons.error, size: 80, color: Colors.white54),
-                            ),
-                          ],
+                        // Deskripsi cuaca dan suhu min/max
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            '${_currentWeather!.description} ${_currentWeather!.temperature.toStringAsFixed(0)}°/${_currentWeather!.temperature.toStringAsFixed(0)}° Kualitas', // Suhu min/max placeholder
+                            style: const TextStyle(fontSize: 20, color: Colors.white70),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                        Text(
-                          _currentWeather!.description.toUpperCase(), // Deskripsi cuaca
-                          style: const TextStyle(fontSize: 24, color: Colors.white70),
+                        Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            'udara: 63 - Sedang', // Kualitas udara placeholder
+                            style: const TextStyle(fontSize: 20, color: Colors.white70),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
-                        const SizedBox(height: 30),
-                        // Bagian lainnya dari slide 1 tetap statis untuk saat ini,
-                        // tetapi Anda bisa menghubungkannya ke data API jika OpenWeatherMap menyediakannya
-                        _buildAirQualityCard(), // Ini masih pakai data statis
+                        const SizedBox(height: 50),
+
+                        // Kartu Kualitas Udara
+                        _buildAirQualityCard(),
                         const SizedBox(height: 20),
-                        _buildDetailedInfoGrid(), // Ini masih pakai data statis
+
+                        // Prakiraan Per Jam
+                        _buildHourlyForecast(),
                         const SizedBox(height: 20),
-                        _buildSunriseSunsetCard(context), // Ini masih pakai data statis
-                        const SizedBox(height: 20),
-                        _buildLifestyleTips(), // Ini masih pakai data statis
+
+                        // Prakiraan Harian
+                        _buildDailyForecast(),
                         const SizedBox(height: 20),
                       ],
                     )
@@ -219,104 +266,55 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage> {
               ),
             ),
           ),
+          // Search bar di atas konten (floating)
+          Positioned(
+            top: MediaQuery.of(context).padding.top + kToolbarHeight, // Sesuaikan posisi
+            left: 16,
+            right: 16,
+            child: _buildSearchBarDashboard(),
+          ),
         ],
       ),
     );
   }
 
-  // Fungsi untuk membangun AppBar kustom
-  SliverAppBar _buildCustomAppBar(BuildContext context) {
-    return SliverAppBar(
-      backgroundColor: Colors.transparent,
-      elevation: 0,
-      expandedHeight: 80.0,
-      flexibleSpace: FlexibleSpaceBar(
-        titlePadding: EdgeInsets.zero,
-        background: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.blueGrey.shade900.withOpacity(0.8),
-                Colors.black.withOpacity(0.0),
-              ],
-            ),
-          ),
-        ),
+  // Search bar khusus untuk Dashboard
+  Widget _buildSearchBarDashboard() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(15.0),
+        border: Border.all(color: Colors.white.withOpacity(0.2)),
       ),
-      title: const Padding(
-        padding: EdgeInsets.only(left: 8.0, top: 20.0),
-        child: Text(
-          'Trasak',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+      child: TextField(
+        controller: _citySearchController,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          hintText: 'Cari kota...',
+          hintStyle: const TextStyle(color: Colors.white70),
+          prefixIcon: const Icon(Icons.search, color: Colors.white),
+          suffixIcon: IconButton(
+            icon: _isLoading ? const CircularProgressIndicator(strokeWidth: 2, color: Colors.white) : const Icon(Icons.send, color: Colors.white),
+            onPressed: () {
+              _fetchWeather(_citySearchController.text);
+            },
           ),
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14.0, horizontal: 10.0),
         ),
+        onSubmitted: (value) {
+          _fetchWeather(value);
+        },
       ),
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 8.0, top: 20.0),
-          child: Row(
-            children: [
-              // Tombol untuk menavigasi ke halaman kelola kota
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.add, color: Colors.white),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => const ManageCitiesPage()),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.white),
-                  onPressed: () {
-                    // Aksi untuk ikon menu
-                  },
-                ),
-              ),
-              const SizedBox(width: 8),
-              Container(
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: IconButton(
-                  icon: const Icon(Icons.settings, color: Colors.white),
-                  onPressed: () {
-                    // Aksi untuk ikon pengaturan
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-      floating: true,
-      pinned: false,
     );
   }
 
+
   // Fungsi pembantu untuk membangun kartu umum
-  Widget _buildCard({required Widget child, EdgeInsets? padding}) {
+  Widget _buildCard({required Widget child, EdgeInsets? padding, Color? color}) {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2C).withOpacity(0.8),
+        color: color ?? const Color(0xFF2C2C2C).withOpacity(0.8), // Warna kartu default atau kustom
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -332,39 +330,50 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage> {
     );
   }
 
-  // Fungsi untuk membangun kartu Kualitas Udara (masih statis)
+  // Kartu Kualitas Udara (didesain ulang sesuai gambar baru)
   Widget _buildAirQualityCard() {
     return _buildCard(
+      color: Colors.blue.shade700.withOpacity(0.8), // Warna biru untuk kartu ini
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              const Icon(Icons.eco_outlined, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
               const Text(
-                'Kualitas udara',
+                'Sedang',
                 style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white54),
+              const Spacer(),
+              // Teks 'Sedang' dan angka 63 di kanan
+              Text(
+                '63',
+                style: TextStyle(
+                  fontSize: 36,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 8),
           const Text(
-            'Sedang 59',
+            'Kualitas udara dapat diterima; namun, bagi beberapa polutan mungkin ada ke...',
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+              fontSize: 14,
+              color: Colors.white70,
             ),
           ),
           const SizedBox(height: 10),
           LinearProgressIndicator(
-            value: 59 / 100,
-            backgroundColor: Colors.grey.shade700,
-            color: Colors.greenAccent,
+            value: 63 / 100, // Contoh nilai 0-100
+            backgroundColor: Colors.white.withOpacity(0.3),
+            color: Colors.greenAccent, // Warna indikator
             minHeight: 8,
             borderRadius: BorderRadius.circular(5),
           ),
@@ -373,433 +382,122 @@ class _WeatherDashboardPageState extends State<WeatherDashboardPage> {
     );
   }
 
-  // Fungsi untuk membangun Grid Informasi Detail Cuaca (masih statis)
-  Widget _buildDetailedInfoGrid() {
-    return GridView.count(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      childAspectRatio: 1.5,
-      mainAxisSpacing: 16,
-      crossAxisSpacing: 16,
-      children: [
-        _buildInfoGridItem(
-          icon: Icons.wb_sunny_outlined,
-          title: 'UV',
-          value: '0 Sangat le...',
-        ),
-        _buildInfoGridItem(
-          icon: Icons.thermostat_outlined,
-          title: 'Terasa seperti',
-          value: '29 °',
-        ),
-        _buildInfoGridItem(
-          icon: Icons.water_drop_outlined,
-          title: 'Kelembaban',
-          value: '89 %',
-        ),
-        _buildInfoGridItem(
-          icon: Icons.wind_power,
-          title: 'Angin STG',
-          value: '3 mpj',
-        ),
-        _buildInfoGridItem(
-          icon: Icons.compress,
-          title: 'Tekanan udara',
-          value: '1.011 hPa',
-        ),
-        _buildInfoGridItem(
-          icon: Icons.visibility_outlined,
-          title: 'Visibilitas',
-          value: '14 km',
-        ),
-      ],
-    );
-  }
+  // Bagian Prakiraan Per Jam
+  Widget _buildHourlyForecast() {
+    // Data dummy untuk prakiraan per jam
+    final List<Map<String, dynamic>> hourlyData = [
+      {'time': 'Sekarang', 'temp': '29°', 'icon': Icons.wb_cloudy_outlined},
+      {'time': '17.00', 'temp': '29°', 'icon': Icons.wb_cloudy_outlined},
+      {'time': '17.18', 'temp': '29°', 'icon': Icons.wb_sunny_outlined}, // Icon matahari di tengah
+      {'time': '18.00', 'temp': '28°', 'icon': Icons.wb_cloudy_outlined},
+      {'time': '19.00', 'temp': '28°', 'icon': Icons.wb_cloudy_outlined},
+      {'time': '20.00', 'temp': '27°', 'icon': Icons.cloud_outlined},
+      {'time': '21.00', 'temp': '26°', 'icon': Icons.cloud_outlined},
+    ];
 
-  // Fungsi pembantu untuk item dalam Grid Informasi Detail
-  Widget _buildInfoGridItem({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return _buildCard(
-      padding: const EdgeInsets.all(12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(icon, size: 28, color: Colors.white),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 14,
-              color: Colors.white54,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Fungsi untuk membangun kartu Terbit/Terbenam Matahari (masih statis)
-  Widget _buildSunriseSunsetCard(BuildContext context) {
     return _buildCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Icon(Icons.wb_sunny_outlined, size: 24, color: Colors.white),
-              const Text(
-                'Terbit',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                ),
-              ),
-              Expanded(
-                child: SliderTheme(
-                  data: SliderTheme.of(context).copyWith(
-                    trackHeight: 4.0,
-                    thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 0.0),
-                    overlayShape: const RoundSliderOverlayShape(overlayRadius: 0.0),
-                    trackShape: const RectangularSliderTrackShape(),
-                    activeTrackColor: Colors.amberAccent,
-                    inactiveTrackColor: Colors.blueGrey.shade800,
-                  ),
-                  child: Slider(
-                    value: 0.6,
-                    onChanged: (value) {
-                      // Ini slider statis untuk tampilan
-                    },
-                  ),
-                ),
-              ),
-              const Text(
-                'Terbenam',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                ),
-              ),
-              const Icon(Icons.nights_stay_outlined, size: 24, color: Colors.white),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text(
-                '05.35',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              Text(
-                '17.17',
-                style: TextStyle(
-                  fontSize: 28,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Fungsi untuk membangun bagian Kiat Gaya Hidup (masih statis)
-  Widget _buildLifestyleTips() {
-    return _buildCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Text(
-                'Kiat gaya hidup',
-                style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.white70,
-                ),
-              ),
-              const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.white54),
-            ],
+          const Text(
+            'Prakiraan Per Jam',
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
           const SizedBox(height: 15),
-          GridView.count(
+          SizedBox(
+            height: 120, // Tinggi tetap untuk scroll horizontal
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              itemCount: hourlyData.length,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        hourlyData[index]['time']!,
+                        style: const TextStyle(color: Colors.white70, fontSize: 14),
+                      ),
+                      const SizedBox(height: 8),
+                      Icon(
+                        hourlyData[index]['icon']!,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        hourlyData[index]['temp']!,
+                        style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Bagian Prakiraan Harian
+  Widget _buildDailyForecast() {
+    // Data dummy untuk prakiraan harian
+    final List<Map<String, dynamic>> dailyData = [
+      {'date': '18 Jun', 'day': 'Hari ini', 'temp': '25°/31°', 'icon': Icons.wb_cloudy_outlined},
+      {'date': '19 Jun', 'day': 'Besok', 'temp': '24°/31°', 'icon': Icons.cloud_outlined},
+      {'date': '20 Jun', 'day': 'Jum', 'temp': '25°/30°', 'icon': Icons.umbrella_outlined}, // Contoh hujan
+      {'date': '21 Jun', 'day': 'Sab', 'temp': '25°/31°', 'icon': Icons.wb_sunny_outlined},
+    ];
+
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Prakiraan 4 Hari', // Judul opsional
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 10),
+          ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            crossAxisCount: 3,
-            childAspectRatio: 1.0,
-            mainAxisSpacing: 10,
-            crossAxisSpacing: 10,
-            children: [
-              _buildLifestyleTipItem(
-                icon: Icons.local_florist_outlined,
-                text: 'Very low pollen count',
-              ),
-              _buildLifestyleTipItem(
-                icon: Icons.umbrella_outlined,
-                text: 'High UV index',
-              ),
-              _buildLifestyleTipItem(
-                icon: Icons.clean_hands_outlined,
-                text: 'Use oil-control products',
-              ),
-              _buildLifestyleTipItem(
-                icon: Icons.directions_car_outlined,
-                text: 'Suitable for car washing',
-              ),
-              _buildLifestyleTipItem(
-                icon: Icons.directions_run_outlined,
-                text: 'Suitable for indoor workouts',
-              ),
-              _buildLifestyleTipItem(
-                icon: Icons.directions_bus_outlined,
-                text: 'Good traffic conditions',
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Fungsi pembantu untuk item Kiat Gaya Hidup
-  Widget _buildLifestyleTipItem({
-    required IconData icon,
-    required String text,
-  }) {
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.1), // Latar belakang ikon lebih gelap transparan
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: Icon(icon, size: 30, color: Colors.white),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          text,
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 12,
-            color: Colors.white70,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-// =========================================================================
-// Halaman Kelola Kota (Slide 2)
-// =========================================================================
-class ManageCitiesPage extends StatelessWidget {
-  const ManageCitiesPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text(
-          'Kelola kota',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        centerTitle: false,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.sort, color: Colors.white),
-            onPressed: () {
-              // Aksi untuk mengurutkan kota
+            itemCount: dailyData.length,
+            itemBuilder: (context, index) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 3,
+                      child: Text(
+                        '${dailyData[index]['date']} ${dailyData[index]['day']}',
+                        style: const TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                    Expanded(
+                      flex: 1,
+                      child: Icon(
+                        dailyData[index]['icon']!,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    ),
+                    Expanded(
+                      flex: 2,
+                      child: Text(
+                        dailyData[index]['temp']!,
+                        textAlign: TextAlign.right,
+                        style: const TextStyle(fontSize: 16, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              );
             },
           ),
-          const SizedBox(width: 8),
         ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            _buildSearchBar(),
-            const SizedBox(height: 20),
-            Expanded(
-              child: ListView(
-                children: [
-                  _buildCityWeatherCard(
-                    cityName: 'Trasak',
-                    temperature: '27°',
-                    airQuality: '54 - Bagus',
-                    description: 'Cerah berawan',
-                    cardColor: Colors.blue.shade600,
-                    onTap: () {
-                      Navigator.pop(context); // Kembali ke dashboard
-                      // Untuk fungsi yang lebih canggih, gunakan provider/bloc untuk manajemen state lintas halaman.
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildCityWeatherCard(
-                    cityName: 'Blumbungan',
-                    temperature: '27°',
-                    airQuality: '49 - Luar biasa',
-                    description: 'Cerah berawan',
-                    cardColor: Colors.blue.shade600,
-                    onTap: () {
-                      Navigator.pop(context); // Kembali ke dashboard
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  _buildCityWeatherCard(
-                    cityName: 'Pamekasan',
-                    temperature: '26°',
-                    airQuality: '58 - Bagus',
-                    description: 'Hujan sebentar',
-                    cardColor: Colors.blueGrey.shade800,
-                    onTap: () {
-                      Navigator.pop(context); // Kembali ke dashboard
-                    },
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          print('Tambah kota baru');
-          // Anda bisa menambahkan dialog atau navigasi ke halaman input kota baru di sini
-        },
-        backgroundColor: Colors.blue.shade600,
-        child: const Icon(Icons.add, color: Colors.white, size: 30),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-    );
-  }
-
-  // Fungsi untuk membangun Search Bar
-  Widget _buildSearchBar() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8.0),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(15),
-      ),
-      child: const TextField(
-        style: TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          icon: Icon(Icons.search, color: Colors.white54),
-          hintText: 'Cari',
-          hintStyle: TextStyle(color: Colors.white54),
-          border: InputBorder.none,
-        ),
-      ),
-    );
-  }
-
-  // Fungsi untuk membangun Kartu Cuaca Kota
-  Widget _buildCityWeatherCard({
-    required String cityName,
-    required String temperature,
-    required String airQuality,
-    required String description,
-    required Color cardColor,
-    VoidCallback? onTap, // Parameter untuk aksi onTap
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              spreadRadius: 1,
-              blurRadius: 5,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  cityName,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                Text(
-                  temperature,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Kualitas udara: $airQuality',
-              style: const TextStyle(
-                color: Colors.white70,
-                fontSize: 14,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                description,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }
